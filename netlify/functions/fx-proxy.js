@@ -9,33 +9,33 @@ export default async (req, context) => {
     });
   }
 
-  // First try ExchangeRate.host
+  // Try ExchangeRate.host first
   try {
-    const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
-    const data = await res.json();
+    const hostRes = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
+    const hostData = await hostRes.json();
 
-    if (data?.rates?.[target]) {
+    if (hostData?.rates?.[target]) {
       return new Response(JSON.stringify({
-        rate: data.rates[target],
+        rate: hostData.rates[target],
         source: "ExchangeRate.host"
       }), {
         headers: { "Content-Type": "application/json" }
       });
     }
   } catch (e) {
-    // Continue to fallback
+    // proceed to fallback
   }
 
-  // Frankfurter fallback if both base and target are supported
+  // Frankfurter fallback — for supported currencies only
   const frankfurterSupported = ["USD", "EUR", "GBP", "AUD", "INR", "PHP"];
   if (frankfurterSupported.includes(base) && frankfurterSupported.includes(target)) {
     try {
-      const res = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${target}`);
-      const data = await res.json();
+      const frankRes = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${target}`);
+      const frankData = await frankRes.json();
 
-      if (data?.rates?.[target]) {
+      if (frankData?.rates?.[target]) {
         return new Response(JSON.stringify({
-          rate: data.rates[target],
+          rate: frankData.rates[target],
           source: "Frankfurter"
         }), {
           headers: { "Content-Type": "application/json" }
