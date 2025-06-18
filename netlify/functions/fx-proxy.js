@@ -1,36 +1,41 @@
 export default async (req) => {
-  const { searchParams } = new URL(req.url);
-  const base = searchParams.get("base");
-  const target = searchParams.get("target");
-
-  if (!base || !target) {
-    return new Response(JSON.stringify({ error: "Missing query parameters" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const apiKey = "cur_live_JIrwC4Qmy8xZ7W8o1KrpyELOEpDCuSG5NDjrSbsb"; // 🔁 Replace this with your real CurrencyAPI key
-
   try {
-    const res = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${apiKey}&base_currency=${base}&currencies=${target}`);
-    const data = await res.json();
+    const { searchParams } = new URL(req.url);
+    const base = searchParams.get("base");
+    const target = searchParams.get("target");
+
+    if (!base || !target) {
+      return new Response(JSON.stringify({ error: "Missing base or target currency" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const apiKey = "YOUR_CURRENCYAPI_KEY"; // ← Replace with your actual key
+
+    const response = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${apiKey}&base_currency=${base}&currencies=${target}`);
+    const data = await response.json();
 
     const rate = data?.data?.[target]?.value;
 
     if (!rate) {
-      throw new Error("Rate not found in response");
+      return new Response(JSON.stringify({ error: "Currency not supported or rate unavailable", raw: data }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
-    return new Response(JSON.stringify({ rate, source: "CurrencyAPI.com" }), {
-      headers: { "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ rate, source: "CurrencyAPI" }), {
+      headers: { "Content-Type": "application/json" }
     });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Rate fetch error", details: error.message }), {
+  } catch (err) {
+    return new Response(JSON.stringify({
+      error: "Unexpected error occurred",
+      message: err.message
+    }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" }
     });
   }
 };
-
