@@ -9,48 +9,25 @@ export default async (req, context) => {
     });
   }
 
-  // Try ExchangeRate.host first
+  const apiKey = "cur_live_JIrwC4Qmy8xZ7W8o1KrpyELOEpDCuSG5NDjrSbsb"; // 🔁 Replace with your actual API key
+
   try {
-    const hostRes = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
-    const hostData = await hostRes.json();
+    const res = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${apiKey}&base_currency=${base}&currencies=${target}`);
+    const data = await res.json();
 
-    if (hostData?.rates?.[target]) {
-      return new Response(JSON.stringify({
-        rate: hostData.rates[target],
-        source: "ExchangeRate.host"
-      }), {
-        headers: { "Content-Type": "application/json" }
-      });
+    const rate = data?.data?.[target]?.value;
+    if (!rate) {
+      throw new Error("Rate not found");
     }
-  } catch (e) {
-    // proceed to fallback
+
+    return new Response(JSON.stringify({ rate, source: "CurrencyAPI.com" }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Rate fetch error", details: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
-
-  // Frankfurter fallback — for supported currencies only
-  const frankfurterSupported = ["USD", "EUR", "GBP", "AUD", "INR", "PHP"];
-  if (frankfurterSupported.includes(base) && frankfurterSupported.includes(target)) {
-    try {
-      const frankRes = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${target}`);
-      const frankData = await frankRes.json();
-
-      if (frankData?.rates?.[target]) {
-        return new Response(JSON.stringify({
-          rate: frankData.rates[target],
-          source: "Frankfurter"
-        }), {
-          headers: { "Content-Type": "application/json" }
-        });
-      }
-    } catch (err) {
-      return new Response(JSON.stringify({ error: "Frankfurter fetch error", details: err.message }), {
-        status: 502,
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-  }
-
-  return new Response(JSON.stringify({ error: "Rate unavailable for given currencies." }), {
-    status: 404,
-    headers: { "Content-Type": "application/json" }
-  });
 };
+
