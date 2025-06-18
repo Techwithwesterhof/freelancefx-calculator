@@ -1,36 +1,16 @@
-export async function handler(event, context) {
-  const { base, target } = event.queryStringParameters || {};
-  const apikey = process.env.EXCHANGE_API_KEY || "";
-
-  if (!base || !target) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Missing base or target currency." })
-    };
-  }
-
-  const url = `https://api.exchangerate.host/latest?base=${base}&symbols=${target}${apikey ? `&apikey=${apikey}` : ""}`;
+export default async (req, context) => {
+  const url = new URL(req.url);
+  const base = url.searchParams.get('base');
+  const target = url.searchParams.get('target');
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
+    const data = await res.json();
 
-    if (!data || !data.rates || !data.rates[target]) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "Rate fetch error", response: data })
-      };
-    }
-
-    return {
-      statusCode: 200,
-      headers: { "cache-control": "max-age=60" },
-      body: JSON.stringify({ rate: data.rates[target] })
-    };
+    return Response.json({
+      rate: data.rates?.[target] || null
+    });
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Server error", message: error.message })
-    };
+    return Response.json({ error: "Rate fetch error", details: error.message });
   }
-}
+};
