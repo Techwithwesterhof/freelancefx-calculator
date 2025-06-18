@@ -1,121 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FreelanceFX Calculator (Hybrid Proxy)</title>
-  <style>
-    body { font-family: 'Poppins', sans-serif; background: #f5f6fa; margin: 0; padding: 40px 10px; }
-    .fx-calculator {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    h2 { text-align: center; color: #0a1a2f; }
-    input, select, button {
-      width: 100%; padding: 12px; margin: 10px 0;
-      font-size: 1rem; border-radius: 6px; border: 1px solid #ccc;
-    }
-    button {
-      background: #c4a859; color: white; border: none;
-      font-weight: bold; cursor: pointer;
-    }
-    table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ddd; padding: 10px; text-align: center;
-    }
-    th { background: #0a1a2f; color: #fff; }
-    @media screen and (max-width: 600px) {
-      body { padding: 20px 5px; }
-      table th, table td { font-size: 14px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="fx-calculator">
-    <h2>FreelanceFX Calculator (Live Rates)</h2>
-    <label for="base">Select currency:</label>
-    <select id="base">
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
-      <option value="GBP">GBP</option>
-      <option value="AUD">AUD</option>
-    </select>
-    <label for="target">Select payout currency:</label>
-    <select id="target">
-      <option value="NGN">NGN - Nigerian Naira</option>
-      <option value="INR">INR - Indian Rupee</option>
-      <option value="PHP">PHP - Philippine Peso</option>
-      <option value="ZAR">ZAR - South African Rand</option>
-      <option value="GHS">GHS - Ghanaian Cedi</option>
-      <option value="KES">KES - Kenyan Shilling</option>
-      <option value="RWF">RWF - Rwandan Franc</option>
-      <option value="ZWL">ZWL - Zimbabwean Dollar</option>
-    </select>
-    <label for="amount">Enter amount:</label>
-    <input type="number" id="amount" placeholder="e.g. 1000" />
-    <button onclick="calculate()">Compare Payouts</button>
-    <table>
-      <thead>
-        <tr>
-          <th>Platform</th>
-          <th>FX Rate</th>
-          <th>Fee (Base)</th>
-          <th>Final Payout</th>
-          <th>Speed</th>
-        </tr>
-      </thead>
-      <tbody id="results"></tbody>
-    </table>
-  </div>
+export default async (req, context) => {
+  const base = req.query.base;
+  const target = req.query.target;
 
-  <script>
-    async function calculate() {
-      const amount = parseFloat(document.getElementById('amount').value) || 0;
-      const base = document.getElementById('base').value;
-      const target = document.getElementById('target').value;
+  if (!base || !target) {
+    return new Response(JSON.stringify({ error: "Missing query params" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 
-      try {
-        const res = await fetch(`/.netlify/functions/fx-proxy?base=${base}&target=${target}`);
-        const data = await res.json();
-        const rate = data.rate;
+  try {
+    const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
+    const data = await res.json();
 
-        if (!rate) {
-          alert("Could not retrieve exchange rate. Please try again later.");
-          return;
-        }
-
-        const platforms = [
-          { name: "Wise", fee: 8, margin: 5, speed: "1–2 days" },
-          { name: "Payoneer", fee: 20, margin: 10, speed: "1–3 days" },
-          { name: "PayPal", fee: 35, margin: 20, speed: "1–2 days" },
-          { name: "XE", fee: 10, margin: 7, speed: "1–2 days" }
-        ];
-
-        const results = platforms.map(p => {
-          const fxRate = rate * (1 - p.margin / 100);
-          const final = (amount - p.fee) * fxRate;
-          return `<tr>
-            <td>${p.name}</td>
-            <td>${fxRate.toFixed(2)}</td>
-            <td>${p.fee} ${base}</td>
-            <td>${final.toLocaleString()} ${target}</td>
-            <td>${p.speed}</td>
-          </tr>`;
-        }).join("");
-
-        document.getElementById('results').innerHTML = results;
-      } catch (err) {
-        alert("Could not retrieve exchange rate. Please try again later.");
-      }
-    }
-  </script>
-</body>
-</html>
+    return new Response(JSON.stringify({
+      rate: data?.rates?.[target] || null
+    }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Rate fetch error", details: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+};
 
 
