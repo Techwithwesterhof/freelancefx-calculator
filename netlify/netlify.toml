@@ -3,6 +3,9 @@
   functions = "netlify/functions"
   publish = "."
 
+[template.environment]
+  EXCHANGE_API_KEY = "47aedde3da968ec0c428b2ea2f65c911"
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
