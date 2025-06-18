@@ -11,7 +11,7 @@ export default async (req) => {
       });
     }
 
-    const apiKey = "cur_live_JIrwC4Qmy8xZ7W8o1KrpyELOEpDCuSG5NDjrSbsb"; // ← Replace with your actual key
+    const apiKey = "cur_live_JIrwC4Qmy8xZ7W8o1KrpyELOEpDCuSG5NDjrSbsb";
 
     const response = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${apiKey}&base_currency=${base}&currencies=${target}`);
     const data = await response.json();
@@ -19,7 +19,7 @@ export default async (req) => {
     const rate = data?.data?.[target]?.value;
 
     if (!rate) {
-      return new Response(JSON.stringify({ error: "Currency not supported or rate unavailable", raw: data }), {
+      return new Response(JSON.stringify({ error: "Rate not found", raw: data }), {
         status: 404,
         headers: { "Content-Type": "application/json" }
       });
@@ -31,7 +31,7 @@ export default async (req) => {
 
   } catch (err) {
     return new Response(JSON.stringify({
-      error: "Unexpected error occurred",
+      error: "Unexpected error",
       message: err.message
     }), {
       status: 500,
@@ -39,3 +39,4 @@ export default async (req) => {
     });
   }
 };
+
