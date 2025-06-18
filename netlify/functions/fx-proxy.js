@@ -8,7 +8,7 @@ export async function handler(event, context) {
   }
 
   try {
-    const response = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}&apikey=830e5919fd1f03bd62ff3c282ee48469`);
+    const response = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}&apikey=47aedde3da968ec0c428b2ea2f65c911`);
     const data = await response.json();
 
     if (!data || !data.rates || !data.rates[target]) {
