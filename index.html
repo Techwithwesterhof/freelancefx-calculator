@@ -68,7 +68,7 @@
       <tbody id="results"></tbody>
     </table>
     <p style="margin-top:15px; font-size:0.9rem; text-align:center;">
-      🔁 Rates sourced from <a href="https://frankfurter.app" target="_blank">Frankfurter.app</a>
+      🔁 Rates sourced in real-time from <a href="https://exchangerate.host" target="_blank">ExchangeRate.host</a>
     </p>
   </div>
 
@@ -79,13 +79,12 @@
       const target = document.getElementById('target').value;
 
       try {
-        const res = await fetch(`https://api.frankfurter.app/latest?from=${base}&to=${target}`);
+        const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
         const data = await res.json();
-        const rate = data.rates?.[target];
+        const rate = data?.rates?.[target];
 
         if (!rate) {
-          alert("Could not retrieve exchange rate. Please try again later.");
-          return;
+          throw new Error("Invalid currency or unavailable rate");
         }
 
         const platforms = [
@@ -109,9 +108,10 @@
 
         document.getElementById('results').innerHTML = results;
       } catch (err) {
-        alert("Error fetching exchange rate. Please try again.");
+        document.getElementById('results').innerHTML = `<tr><td colspan="5">⚠️ Could not retrieve exchange rate. Please try again later.</td></tr>`;
       }
     }
   </script>
 </body>
 </html>
+
