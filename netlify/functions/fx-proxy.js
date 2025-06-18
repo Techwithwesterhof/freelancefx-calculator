@@ -1,6 +1,6 @@
 export async function handler(event, context) {
   const { base, target } = event.queryStringParameters || {};
-  const apikey = process.env.EXCHANGE_API_KEY || ""; // optional API key
+  const apikey = process.env.EXCHANGE_API_KEY || "";
 
   if (!base || !target) {
     return {
