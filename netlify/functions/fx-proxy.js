@@ -8,8 +8,8 @@ export async function handler(event, context) {
   }
 
   try {
-    const resp = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
-    const data = await resp.json();
+    const response = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
+    const data = await response.json();
 
     if (!data || !data.rates || !data.rates[target]) {
       return {
