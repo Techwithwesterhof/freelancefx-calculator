@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,13 +80,9 @@
       const target = document.getElementById('target').value;
 
       try {
-        const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}`);
-        const data = await res.json();
-        const rate = data?.rates?.[target];
-
-        if (!rate) {
-          throw new Error("Invalid currency or unavailable rate");
-        }
+        const res = await fetch(`/.netlify/functions/fx-proxy?base=${base}&target=${target}`);
+        const { rate } = await res.json();
+        if (!rate) throw new Error();
 
         const platforms = [
           { name: "Wise", fee: 8, margin: 5, speed: "1–2 days" },
@@ -107,8 +104,9 @@
         }).join("");
 
         document.getElementById('results').innerHTML = results;
-      } catch (err) {
-        document.getElementById('results').innerHTML = `<tr><td colspan="5">⚠️ Could not retrieve exchange rate. Please try again later.</td></tr>`;
+      } catch {
+        document.getElementById('results').innerHTML =
+          `<tr><td colspan="5">⚠️ Could not retrieve exchange rate. Please try again later.</td></tr>`;
       }
     }
   </script>
