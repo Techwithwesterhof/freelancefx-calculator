@@ -1,5 +1,7 @@
 export async function handler(event, context) {
   const { base, target } = event.queryStringParameters || {};
+  const apikey = process.env.EXCHANGE_API_KEY || ""; // optional API key
+
   if (!base || !target) {
     return {
       statusCode: 400,
@@ -7,8 +9,10 @@ export async function handler(event, context) {
     };
   }
 
+  const url = `https://api.exchangerate.host/latest?base=${base}&symbols=${target}${apikey ? `&apikey=${apikey}` : ""}`;
+
   try {
-    const response = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${target}&apikey=47aedde3da968ec0c428b2ea2f65c911`);
+    const response = await fetch(url);
     const data = await response.json();
 
     if (!data || !data.rates || !data.rates[target]) {
@@ -30,4 +34,3 @@ export async function handler(event, context) {
     };
   }
 }
-
