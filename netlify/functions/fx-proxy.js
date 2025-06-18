@@ -1,3 +1,4 @@
+
 export default async (req) => {
   try {
     const { searchParams } = new URL(req.url);
@@ -19,7 +20,7 @@ export default async (req) => {
     const rate = data?.data?.[target]?.value;
 
     if (!rate) {
-      return new Response(JSON.stringify({ error: "Rate not found", raw: data }), {
+      return new Response(JSON.stringify({ error: "Currency not supported or rate unavailable", raw: data }), {
         status: 404,
         headers: { "Content-Type": "application/json" }
       });
@@ -31,7 +32,7 @@ export default async (req) => {
 
   } catch (err) {
     return new Response(JSON.stringify({
-      error: "Unexpected error",
+      error: "Unexpected error occurred",
       message: err.message
     }), {
       status: 500,
@@ -39,4 +40,3 @@ export default async (req) => {
     });
   }
 };
-
