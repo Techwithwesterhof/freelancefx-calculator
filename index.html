@@ -1,19 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FreelanceFX Calculator (Live Rates)</title>
+  <title>FreelanceFX Calculator</title>
   <style>
-    body { font-family: 'Poppins', sans-serif; background: #f5f6fa; margin: 0; padding: 40px 10px; }
-    .fx-calculator {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
+    body { font-family: 'Poppins', sans-serif; background: #f4f4f4; margin: 0; padding: 40px 10px; }
+    .fx-calculator { max-width: 600px; margin: auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
     h2 { text-align: center; color: #0a1a2f; }
     input, select, button {
       width: 100%; padding: 12px; margin: 10px 0;
@@ -23,12 +17,8 @@
       background: #c4a859; color: white; border: none;
       font-weight: bold; cursor: pointer;
     }
-    table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ddd; padding: 10px; text-align: center;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
     th { background: #0a1a2f; color: #fff; }
     @media screen and (max-width: 600px) {
       body { padding: 20px 5px; }
@@ -41,7 +31,6 @@
     <h2>FreelanceFX Calculator (Live Rates)</h2>
     <label for="base">Select currency:</label>
     <select id="base">
-      <option value="">--Select--</option>
       <option value="USD">USD</option>
       <option value="EUR">EUR</option>
       <option value="GBP">GBP</option>
@@ -49,7 +38,6 @@
     </select>
     <label for="target">Select payout currency:</label>
     <select id="target">
-      <option value="">--Select--</option>
       <option value="NGN">NGN - Nigerian Naira</option>
       <option value="INR">INR - Indian Rupee</option>
       <option value="PHP">PHP - Philippine Peso</option>
@@ -69,32 +57,29 @@
       </thead>
       <tbody id="results"></tbody>
     </table>
-    <p style="margin-top:15px; font-size:0.9rem; text-align:center;">
-      🔁 Rates sourced in real-time from CurrencyAPI
-    </p>
   </div>
-
   <script>
     async function calculate() {
       const amount = parseFloat(document.getElementById('amount').value);
       const base = document.getElementById('base').value;
       const target = document.getElementById('target').value;
+      const resultsEl = document.getElementById('results');
+      resultsEl.innerHTML = "";
 
-      if (!amount || !base || !target) {
+      if (!amount || amount <= 0 || !base || !target) {
         alert("Please select both currencies and enter a valid amount.");
         return;
       }
 
       try {
-        const res = await fetch(`https://freelancefx-calculator.netlify.app/api/rates?base=${base}&target=${target}`);
+        const res = await fetch(`/api/rates?base=${base}&target=${target}`);
         const data = await res.json();
-        const rate = data?.rate;
-
-        if (!rate) {
+        if (!data?.rate) {
           alert("Live exchange rate currently unavailable.");
           return;
         }
 
+        const rate = data.rate;
         const platforms = [
           { name: "Wise", fee: 8, margin: 5, speed: "1–2 days" },
           { name: "Payoneer", fee: 20, margin: 10, speed: "1–3 days" },
@@ -102,7 +87,7 @@
           { name: "XE", fee: 10, margin: 7, speed: "1–2 days" }
         ];
 
-        const results = platforms.map(p => {
+        const rows = platforms.map(p => {
           const fxRate = rate * (1 - p.margin / 100);
           const final = (amount - p.fee) * fxRate;
           return `<tr>
@@ -113,9 +98,8 @@
             <td>${p.speed}</td>
           </tr>`;
         }).join("");
-
-        document.getElementById('results').innerHTML = results;
-      } catch (err) {
+        resultsEl.innerHTML = rows;
+      } catch (e) {
         alert("Unexpected error occurred. Please try again later.");
       }
     }
