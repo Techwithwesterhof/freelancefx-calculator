@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FreelanceFX Calculator</title>
+  <title>FreelanceFX Calculator (Live Rates)</title>
   <style>
     body { font-family: 'Poppins', sans-serif; background: #f5f6fa; margin: 0; padding: 40px 10px; }
     .fx-calculator {
@@ -70,6 +69,9 @@
       </thead>
       <tbody id="results"></tbody>
     </table>
+    <p style="margin-top:15px; font-size:0.9rem; text-align:center;">
+      🔁 Rates sourced in real-time from CurrencyAPI
+    </p>
   </div>
 
   <script>
@@ -84,10 +86,10 @@
       }
 
       try {
-        const res = await fetch(`/api/rates?base=${base}&target=${target}`);
+        const res = await fetch(`https://freelancefx-proxy.netlify.app/api/rates?base=${base}&target=${target}`);
         const data = await res.json();
-
         const rate = data?.rate;
+
         if (!rate) {
           alert("Live exchange rate currently unavailable.");
           return;
@@ -113,7 +115,6 @@
         }).join("");
 
         document.getElementById('results').innerHTML = results;
-
       } catch (err) {
         alert("Unexpected error occurred. Please try again later.");
       }
