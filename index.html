@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,28 @@
   <title>FreelanceFX Calculator</title>
 </head>
 <body>
-  <h1>FreelanceFX Calculator Ready</h1>
-  <p>Deployment Successful!</p>
+  <h2>FreelanceFX Calculator</h2>
+  <label>Base currency: <input id="base" value="USD"/></label><br>
+  <label>Target currency: <input id="target" value="INR"/></label><br>
+  <label>Amount: <input id="amount" value="1000"/></label><br>
+  <button onclick="getRate()">Convert</button>
+  <p id="result"></p>
+
+  <script>
+    async function getRate() {
+      const base = document.getElementById('base').value;
+      const target = document.getElementById('target').value;
+      const amount = parseFloat(document.getElementById('amount').value || 0);
+      const res = await fetch(`/.netlify/functions/rates?base=${base}&target=${target}`);
+      const data = await res.json();
+      if (data.rate) {
+        const converted = (amount * data.rate).toFixed(2);
+        document.getElementById('result').textContent = `Rate: ${data.rate} | Converted: ${converted} ${target}`;
+      } else {
+        document.getElementById('result').textContent = "⚠️ Could not retrieve rate.";
+      }
+    }
+  </script>
 </body>
 </html>
+
