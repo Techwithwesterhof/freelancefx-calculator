@@ -11,7 +11,7 @@ export default async (req) => {
       });
     }
 
-    const apiKey = "cur_live_JIrwC4Qmy8xZ7W8o1KrpyELOEpDCuSG5NDjrSbsb";
+    const apiKey = "cur_live_JIrwC4Qmy8xZ7W8o1KrpyELOEpDCuSG5NDjrSbsb";  // Replace if needed
 
     const response = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${apiKey}&base_currency=${base}&currencies=${target}`);
     const data = await response.json();
@@ -28,6 +28,7 @@ export default async (req) => {
     return new Response(JSON.stringify({ rate, source: "CurrencyAPI" }), {
       headers: { "Content-Type": "application/json" }
     });
+
   } catch (err) {
     return new Response(JSON.stringify({
       error: "Unexpected error occurred",
