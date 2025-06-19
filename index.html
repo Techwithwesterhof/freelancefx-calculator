@@ -86,7 +86,7 @@
       }
 
       try {
-        const res = await fetch(`https://freelancefx-proxy.netlify.app/api/rates?base=${base}&target=${target}`);
+        const res = await fetch(`https://freelancefx-calculator.netlify.app/api/rates?base=${base}&target=${target}`);
         const data = await res.json();
         const rate = data?.rate;
 
